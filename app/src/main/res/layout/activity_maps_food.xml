@@ -6,11 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".Maps_food">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".Trasarlinea"></fragment>
+        android:id="@+id/map"
+        tools:context=".Maps_food"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+<!--    <fragment-->
+<!--        android:id="@+id/map"-->
+<!--        android:name="com.google.android.gms.maps.SupportMapFragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        tools:context=".Trasarlinea"/>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

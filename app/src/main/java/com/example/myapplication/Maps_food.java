@@ -1,12 +1,18 @@
 package com.example.myapplication;
+
+import static com.example.myapplication.Utils.Utils.coordenadas;
+import static com.example.myapplication.Utils.Utils.markersDefault;
+import static com.example.myapplication.Utils.Utils.routes;
+
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
@@ -24,13 +31,18 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.CameraUpdate;
+import com.example.myapplication.Utils.GPS_controler;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,9 +51,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import Utils.GPS_controler;
-import Utils.Utils;
 
 
 public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
@@ -52,35 +61,91 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
     RequestQueue request;
     Location location;
     GPS_controler gpsTracker;
-
-
+    double latitudeGlobalOrigin = 0;
+    double longitudeGlobalOrigin = 0;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_food);
-
-        gpsTracker=new GPS_controler(getApplicationContext());
-        SupportMapFragment mapFragmaent=(SupportMapFragment) getSupportFragmentManager()
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragmaent.getMapAsync(  this);
-        request= Volley.newRequestQueue(getApplicationContext());
+        mapFragment.getMapAsync(this);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Verifica permisos y obtén la ubicación
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getLocation();
+        } else {
+            // Si no tienes permisos, solicítalos
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        }
 
 
-
+        gpsTracker = new GPS_controler(getApplicationContext());
+//        SupportMapFragment mapFragmaent=(SupportMapFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.map);
+//        mapFragmaent.getMapAsync(  this);
+        request = Volley.newRequestQueue(getApplicationContext());
 
     }
 
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        fusedLocationProviderClient.getLastLocation()
+                .addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            Location lastLocation = task.getResult();
+                            double latitude = lastLocation.getLatitude();
+                            double longitude = lastLocation.getLongitude();
+                            Log.i("LOCATION------------ >", "Latitud: " + latitude +" Longitud: " + longitude);
+                            // Aquí puedes utilizar 'latitude' y 'longitude'
+                            latitudeGlobalOrigin = latitude;
+                            longitudeGlobalOrigin = longitude;
 
+                        }
+                    }
+                });
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        nMap=googleMap;
+        nMap = googleMap;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         nMap.setMyLocationEnabled(true);
         LatLng we=new LatLng(-12.0551371286709, -77.10183047310046);
-        nMap.animateCamera(CameraUpdateFactory.newLatLngZoom(we,10));
-        Utils.markersDefault(nMap,getApplicationContext());
+//        nMap.animateCamera(CameraUpdateFactory.newLatLngZoom(we,10));
+        nMap.addMarker(new MarkerOptions()
+                .position(we)
+                .title("Marker in Peru >:V"));
+        nMap.moveCamera(CameraUpdateFactory.newLatLng(we));
+
+        markersDefault(nMap,getApplicationContext());
         nMap.setOnMapClickListener(this);
         nMap.setOnMarkerClickListener(this);
 
@@ -90,8 +155,8 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
     @Override
     public void onMapLongClick(LatLng latLng) {
 
-    Utils.coordenadas.setOrigenLat(latLng.latitude);
-    Utils.coordenadas.setDestinoLat(latLng.longitude);
+    coordenadas.setOrigenLat(latLng.latitude);
+    coordenadas.setDestinoLat(latLng.longitude);
         Toast.makeText(Maps_food.this, "toque icono para que selecciones", Toast.LENGTH_LONG).show();
 
 
@@ -102,7 +167,7 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 123) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                getLocation();
             } else {
 
                 Toast.makeText(this, "You didn't give permission to access device location", Toast.LENGTH_LONG).show();
@@ -155,7 +220,7 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
                                 }
                             }
 
-                            Utils.routes.add(path);
+                            routes.add(path);
 
                             Intent intent = new Intent(Maps_food.this, Trasarlinea.class);
                             startActivity(intent);
@@ -227,10 +292,6 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-
-
-
         }
 
         @Override
@@ -259,12 +320,12 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
             }else{
                 Log.d("Asyntask", "Coordenadas");
                 Toast.makeText(Maps_food.this, "LISTO", Toast.LENGTH_SHORT).show();
-                Utils.coordenadas.setOrigenLat(location.getLatitude());
-                Utils.coordenadas.setOrigenLng(location.getLongitude());
-                Log.d("Asyntask", String.valueOf(location.getLatitude()));
-                Log.d("Asyntask", String.valueOf(location.getLongitude()));
-                ObtenerRuta(String.valueOf(Utils.coordenadas.getOrigenLat()), String.valueOf(Utils.coordenadas.getOrigenLng()),
-                        String.valueOf(Utils.coordenadas.getDestinoLat()), String.valueOf(Utils.coordenadas.getDestinoLng()));
+                coordenadas.setOrigenLat(latitudeGlobalOrigin);
+                coordenadas.setOrigenLng(longitudeGlobalOrigin);
+                Log.d("Asyntask", String.valueOf(latitudeGlobalOrigin));
+                Log.d("Asyntask", String.valueOf(longitudeGlobalOrigin));
+                ObtenerRuta(String.valueOf(coordenadas.getOrigenLat()), String.valueOf(coordenadas.getOrigenLng()),
+                        String.valueOf(coordenadas.getDestinoLat()), String.valueOf(coordenadas.getDestinoLng()));
 
             }
 
@@ -294,8 +355,8 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Utils.coordenadas.setDestinoLat(latLng.latitude);
-                Utils.coordenadas.setDestinoLng(latLng.longitude);
+                coordenadas.setDestinoLat(latLng.latitude);
+                coordenadas.setDestinoLng(latLng.longitude);
 
                 new MyAsyncTask().execute(0);
 

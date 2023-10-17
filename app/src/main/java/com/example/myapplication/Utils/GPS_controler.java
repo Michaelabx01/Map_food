@@ -1,4 +1,4 @@
-package Utils;
+package com.example.myapplication.Utils;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -9,11 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-
-import java.util.List;
 
 public class GPS_controler implements LocationListener {
 

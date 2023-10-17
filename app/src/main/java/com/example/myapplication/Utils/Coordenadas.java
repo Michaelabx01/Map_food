@@ -1,4 +1,4 @@
-package Utils;
+package com.example.myapplication.Utils;
 
 public class Coordenadas {
     Double origenLat;
