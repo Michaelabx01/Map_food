@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,6 +40,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -69,19 +73,19 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_food);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Verifica permisos y obtén la ubicación
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             getLocation();
         } else {
-            // Si no tienes permisos, solicítalos
+
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
         }
 
@@ -91,6 +95,7 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
 //                .findFragmentById(R.id.map);
 //        mapFragmaent.getMapAsync(  this);
         request = Volley.newRequestQueue(getApplicationContext());
+
 
     }
 
@@ -124,32 +129,90 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         nMap = googleMap;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
         nMap.setMyLocationEnabled(true);
-        LatLng we=new LatLng(-12.0551371286709, -77.10183047310046);
-//        nMap.animateCamera(CameraUpdateFactory.newLatLngZoom(we,10));
+        LatLng we = new LatLng(-11.9375836458254, -77.06901738170907);
+        LatLng we2 = new LatLng(-12.023637768777364, -77.00172613667773);
+        LatLng we3 =new LatLng(-12.014182185677132, -77.09715986935018);
+        LatLng we4 =new LatLng(-11.967753412312058, -77.0712759685157);
+        LatLng w5 =new LatLng(-11.995790286615186, -77.11934121573613);
+        LatLng w6 =new LatLng(-12.091599750579848, -77.02586170675298);
+
+        Bitmap originalBitmapKFC = BitmapFactory.decodeResource(getResources(), R.drawable.ic_kfc);
+
+        Bitmap originalBitmapPopeyes = BitmapFactory.decodeResource(getResources(), R.drawable.ic_popeyes);
+
+        Bitmap originalBitmapPizzahub = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pizzahub);
+
+        Bitmap originalBitmapBurgerking = BitmapFactory.decodeResource(getResources(), R.drawable.ic_burguerking);
+
+        Bitmap originalBitmapMcDonalds = BitmapFactory.decodeResource(getResources(), R.drawable.ic_macdonals);
+
+        Bitmap originalBitmapChilis = BitmapFactory.decodeResource(getResources(), R.drawable.ic_chilis);
+
+
+        int width = 70;
+        int height = 70;
+
+        // Resize the original images
+        Bitmap resizedBitmapKFC = Bitmap.createScaledBitmap(originalBitmapKFC, width, height, false);
+        Bitmap resizedBitmapPopeyes = Bitmap.createScaledBitmap(originalBitmapPopeyes, width, height, false);
+        Bitmap resizedBitmapPizzahub = Bitmap.createScaledBitmap(originalBitmapPizzahub, width, height, false);
+        Bitmap resizedBitmapBurgerking = Bitmap.createScaledBitmap(originalBitmapBurgerking, width, height, false);
+        Bitmap resizedBitmapMcDonalds = Bitmap.createScaledBitmap(originalBitmapMcDonalds, width, height, false);
+        Bitmap resizedBitmapChilis = Bitmap.createScaledBitmap(originalBitmapChilis, width, height, false);
+
+        // Create the BitmapDescriptor from the resized images
+        BitmapDescriptor iconKFC = BitmapDescriptorFactory.fromBitmap(resizedBitmapKFC);
+        BitmapDescriptor iconPopeyes = BitmapDescriptorFactory.fromBitmap(resizedBitmapPopeyes);
+        BitmapDescriptor iconPizzahub = BitmapDescriptorFactory.fromBitmap(resizedBitmapPizzahub);
+        BitmapDescriptor iconBurgerking = BitmapDescriptorFactory.fromBitmap(resizedBitmapBurgerking);
+        BitmapDescriptor iconMcDonalds = BitmapDescriptorFactory.fromBitmap(resizedBitmapMcDonalds);
+        BitmapDescriptor iconChilis = BitmapDescriptorFactory.fromBitmap(resizedBitmapChilis);
+
         nMap.addMarker(new MarkerOptions()
                 .position(we)
-                .title("Marker in Peru >:V"));
+                .title("KFC")
+                .icon(iconKFC));
+
+        nMap.addMarker(new MarkerOptions()
+                .position(we2)
+                .title("Popeyes")
+                .icon(iconPopeyes));
+
+        nMap.addMarker(new MarkerOptions()
+                .position(we3)
+                .title("Pizza Hub")
+                .icon(iconPizzahub));
+
+        nMap.addMarker(new MarkerOptions()
+                .position(we4)
+                .title("Burger King")
+                .icon(iconBurgerking));
+
+        nMap.addMarker(new MarkerOptions()
+                .position(w5)
+                .title("McDonalds")
+                .icon(iconMcDonalds));
+
+        nMap.addMarker(new MarkerOptions()
+                .position(w6)
+                .title("Chilis")
+                .icon(iconChilis));
+
+
         nMap.moveCamera(CameraUpdateFactory.newLatLng(we));
 
-        markersDefault(nMap,getApplicationContext());
+        markersDefault(nMap, getApplicationContext());
         nMap.setOnMapClickListener(this);
         nMap.setOnMarkerClickListener(this);
-
-
     }
 
     @Override
@@ -391,4 +454,6 @@ public class Maps_food extends AppCompatActivity implements OnMapReadyCallback, 
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
     }
+
+
 }

@@ -27,16 +27,16 @@ public class MainActivity extends AppCompatActivity {
                 String enteredUsername = username.getText().toString();
                 String enteredPassword = password.getText().toString();
 
-//                if (enteredUsername.equals("user") && enteredPassword.equals("123")) {
+                if (enteredUsername.equals("user") && enteredPassword.equals("123")) {
                     Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
 
                     // Redirigir a Maps_food (nueva pantalla)
                     Intent intent = new Intent(MainActivity.this, Maps_food.class);
                     startActivity(intent);
 //
-//                } else {
-//                    Toast.makeText(MainActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
-//                }
+                } else {
+                    Toast.makeText(MainActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
